@@ -1,0 +1,66 @@
+  ###############Classifying 404 URL's googlebot is crawling##############################
+  
+  SELECT
+  SPLIT (url, '?') [
+OFFSET
+  (0)] AS url2,
+  DATE(timestamp) AS date,
+  a.request_user_agent ,
+  COUNT(a.request_user_agent),
+  request_host,
+  request_status,
+  b.bot_class
+FROM
+  `scenic-flux.fastly.fastly_money_production` a
+  Join `rvu-seo.reporting_eu.Googlebot_Classification` b on a.request_user_agent = b.request_user_agent 
+WHERE
+  response_header_content_type LIKE 'text/html;%'
+  AND DATE(Timestamp) BETWEEN '2019-01-01'
+  AND '2019-08-31'
+  AND (request_status = '404'
+    OR request_status = '200')
+  AND (client_ip LIKE '66.249%'
+    OR client_ip LIKE '249.%')
+GROUP BY
+  1,
+  2,
+  3,
+  5,
+  6,
+  7
+ 
+HAVING
+  request_host LIKE '%money.co.uk'
+  
+  ############# Non-404 URLS googlebot is crawling #############################
+SELECT
+  SPLIT (url, '?') [
+OFFSET
+  (0)] AS url2,
+  date_trunc(date(timestamp),month) AS month,
+  request_user_agent ,
+  COUNT(a.request_user_agent) as count_user_agent,
+  --SUM(count(a.request_user_agent)) as Monthly_sum_user_agent, 
+  request_host,
+  request_status,
+  url_string
+FROM
+  `scenic-flux.fastly.fastly_money_production` a
+  Join `rvu-seo.reporting_eu.404_money_url`  b on url = b.url_string 
+  Where
+  response_header_content_type LIKE 'text/html;%'
+  AND DATE(Timestamp) BETWEEN '2019-01-01'
+  AND '2019-08-31'
+  AND request_status <> '404'
+  AND (client_ip LIKE '66.249%'
+    OR client_ip LIKE '249.%')
+GROUP BY
+  1,
+  2,
+  3,
+  5,
+  6,
+  7
+ 
+HAVING
+  request_host LIKE '%money.co.uk'
