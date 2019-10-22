@@ -1,0 +1,53 @@
+WITH
+  sc AS (
+  SELECT
+    FORMAT_DATE("%Y-%m-%d",DATE_TRUNC(date, WEEK(Monday))) AS date_week,
+    sub_vertical,
+    vertical,
+    keyword,
+    AVG(position) AS avg_pos,
+    SUM(impressions) AS impressions,
+    SUM(clicks) AS clicks,
+    AVG(ctr) AS ctr
+  FROM
+    `rvu-seo.search_console.search_console_dashboard_view`
+  GROUP BY
+    1,
+    2,
+    3,
+    4 ),
+  kc AS (
+  SELECT
+    kc.sub_vertical,
+    kc.vertical,
+    FORMAT_DATE("%Y-%m-%d",DATE_TRUNC(DATE(kc.ts), WEEK(Monday))) AS date_week,
+    kc.k,
+    kc.bucket_core_level_2
+  FROM
+    `rvu-seo.reporting.keywords_in_classified_sheet_master` kc
+  GROUP BY
+    1,
+    2,
+    3,
+    4,
+    5 )
+SELECT
+  sc.date_week,
+  sc.sub_vertical,
+  sc.vertical,
+  sc.keyword,
+  sc.avg_pos,
+  sc.impressions,
+  sc.clicks,
+  sc.ctr,
+  kc.bucket_core_level_2
+FROM
+  sc
+INNER JOIN
+  kc
+ON
+  sc.keyword = kc.k
+  AND sc.date_week = kc.date_week
+  AND sc.sub_vertical = kc.sub_vertical
+ORDER BY
+  date_week ASC
