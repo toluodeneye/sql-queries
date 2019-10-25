@@ -36,3 +36,5 @@ SELECT
   Where sc.date_week  between '2018-12-31' and '2019-11-23'
 
   Order by date_week desc
+  
+  (Two time periods 2018-01-01 to 2018-12-30) 
