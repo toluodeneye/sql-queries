@@ -1,0 +1,68 @@
+with master_ctr as (--calculate search volume, join ctr curve
+  SELECT 
+   FORMAT_DATE("%Y-%m-%d",date_trunc(date(ts), week(Monday))) as week
+  ,m.k
+  ,m.bucket_core_level_1 
+  ,m.bucket_core_level_2 
+  ,m.bucket_core_level_3 
+  ,m.bucket_core_level_4 
+  ,m.u
+  ,m.d
+  ,m.google_keyword_planner_ideas_volume_12_month 
+  ,m.tr
+  ,google_keyword_planner_ideas_volume_12_month/tr sc
+  ,c.ctr
+  FROM  `rvu-seo.reporting.keywords_in_classified_sheet_master` m
+  inner join `rvu-seo.search_console.ctr_curve_no_vertical_no_date` c on m.tr = c.position and c.real_vertical = 'Energy'
+  where t in ('Organic','Answer')
+  and vertical = 'Energy'
+  and domain = 'uswitch.com' --and bucket_core_level_4  = 'comparison'
+  --and k = 'southern electric'
+  and tr <=20
+ ),
+master as ( --group by week, aggregate search vol (max), rank (average) and search coverage (sum)
+  SELECT 
+  week
+  ,k
+  ,bucket_core_level_1 
+  ,bucket_core_level_2 
+  ,bucket_core_level_3 
+  ,bucket_core_level_4 
+  ,u
+  ,d
+  --,t
+  ,max(google_keyword_planner_ideas_volume_12_month) vol
+  ,avg(tr)  avg_tr
+  ,sum(sc) as sc
+  ,count(*) count
+--  ,sum(google_keyword_planner_ideas_volume_12_month/ctr) sc_ctr
+  FROM master_ctr
+  group by 1,2,3,4,5,6,7,8
+  order by week desc
+)
+select  --calculate WoW values and apply search volume weighting 
+   a.week curr_week
+  ,b.week prev_week
+  ,a.k
+  ,a.bucket_core_level_1 
+  ,a.bucket_core_level_2 
+  ,a.bucket_core_level_3 
+  ,a.bucket_core_level_4 
+  ,a.u
+  ,a.d
+  ,a.avg_tr curr_tr
+  ,b.avg_tr prev_tr
+  ,(a.avg_tr/b.avg_tr)-1 rank_wow
+  ,a.vol curr_gsv
+  ,b.vol prev_gsv
+  ,round(a.sc,0) curr_sc
+  ,round(b.sc,0) prev_sc
+  ,round(a.sc/b.sc,4)-1 sc_wow
+  ,(round(a.sc/b.sc,2)-1)*a.vol sc_wow_weighted
+  from master a
+  inner join master b on a.k = b.k and a.u = b.u and a.d = b.d and cast(a.week as date) = date_add(cast(b.week as date), interval 7 day) and a.count = b.count
+--where a.week < '2019-10-14'
+  order by a.week desc, abs(sc_wow_weighted) desc
+  
+
+
