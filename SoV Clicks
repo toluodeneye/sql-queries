@@ -1,0 +1,16 @@
+# sql-queries
+With sv as(
+
+SELECT keyword, sub_vertical, google_keyword_planner_ideas_volume_12_month FROM `rvu-seo.seo.share_of_voice_keywords`sv),
+
+sc as(
+Select date, keyword, sum(clicks) as clicks, sum(impressions) as impressions, AVG(position) as position FROM `rvu-seo.seo.google_search_console_uswitch_com` where country = 'gbr'
+group by 1,2)
+
+Select
+
+sc.date, sv.keyword, sv.sub_vertical, sv.google_keyword_planner_ideas_volume_12_month, sc.clicks, sc.impressions, sc.position,
+
+from sv join sc on sv.keyword = sc.keyword 
+
+where sc.date > '2019-12-01'
