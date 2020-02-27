@@ -1,0 +1,378 @@
+
+
+with
+bb_comparison as (
+    select 'Broadband'as vertical,
+    'Comparison Pages' as sub_vertical, 'Homepage' as performance_bucket  ,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts, sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page in (
+    '/broadband/compare/wireless_broadband/',
+'/broadband/compare/cheap_broadband/',
+'/broadband/compare/',
+'/broadband/compare/business_broadband/',
+'/broadband/compare/broadband_with_free_gifts/',
+'/broadband/compare/broadband_only/',
+'/broadband/compare/home_phone_and_landline/',
+'/broadband/compare/broadband_and_free_line_rental/',
+'/broadband/compare/free_broadband/',
+'/broadband/compare/free_router/',
+'/broadband/compare/unlimited_broadband/',
+'/broadband/compare/student_broadband/',
+'/broadband/mobile_broadband/',
+'/broadband/compare/fast_broadband/',
+'/broadband/compare/broadband_without_phone_line/',
+'/broadband/compare/broadband_and_sky_sports_deals/',
+'/broadband/compare/broadband_free_laptop/',
+'/broadband/compare/cable_broadband/',
+'/broadband/compare/short_contract_broadband/',
+'/broadband/4g_mobile_broadband/',
+'/broadband/compare/mifi_mobile_broadband/',
+'/broadband/compare/satellite_broadband/',
+'/broadband/compare/black_friday/',
+'/broadband/compare/broadband_free_netbooks/',
+'/broadband/student-broadband',
+'/broadband/cheap-broadband/',
+'/broadband/broadband-only/',
+'/broadband/broadband-and-free-line-rental/',
+'/broadband/wireless-broadband/',
+'/broadband/broadband-and-home-phone/',
+'/broadband/mobile-broadband/',
+'/broadband/student-broadband/',
+'/broadband/business-broadband/',
+'/broadband/unlimited-broadband/',
+'/broadband/no-upfront-cost-broadband/'
+    )
+    group by 3
+), 
+  bb_fibre_optic as (
+    select 'Broadband' as vertical, 'Fibre Optic' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts, sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' -- and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page in ('/broadband/compare/fibre_optic/')
+    group by 3
+),
+   bb_guides as (
+    select 'Broadband' as vertical,'Guides' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts ,sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+     and landing_page LIKE '/broadband/guides/%' 
+    GROUP BY 3
+), 
+bb_homepage as (
+    select 'Broadband' as vertical,
+    'Homepage' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts, sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page in ('/broadband/')
+    GROUP BY 3 
+), 
+bb_homephone as ( 
+    select 'Broadband' as vertical, 'Broadband & Home Phone' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts, sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page in ('/broadband/compare/broadband_and_home_phone/')
+    GROUP BY 3
+), 
+bb_local as (
+    select 'Broadband' as vertical,'Local' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts, sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page like ('/broadband/local/%')
+    GROUP BY 3
+),
+bb_news as (
+    select 'Broadband' as vertical,'News' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts ,sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+     and landing_page LIKE '/broadband/news/%' 
+    GROUP BY 3
+), 
+bb_packages as (
+    select 'Broadband' as vertical, 'Packages' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts ,sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page in ('/broadband/packages/')
+    GROUP BY 3
+), 
+bb_postcode_checker as ( 
+    select 'Broadband' as vertical, 'Postcode checker' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts, sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session    
+    from `uswitch-comms.broadband.comms_broadband_master`
+    where medium = 'organic' -- and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page in ('/broadband/postcode_checker/')
+    GROUP BY 3
+),
+bb_providers as (
+    select 'Broadband' as vertical, 'Providers' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts, sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page in (
+    '/broadband/providers/'
+    ,'/broadband/providers/bt/'
+    ,'/broadband/providers/virgin_media/'
+    ,'/broadband/providers/plusnet/'
+    ,'/broadband/providers/ee/'
+    ,'/broadband/providers/talktalk/'
+    ,'/broadband/providers/sky/'
+    ,'/broadband/providers/vodafone/'
+    ,'/broadband/products/bt_infinity/'
+    ,'/broadband/providers/now_broadband/'
+    ,'/broadband/products/sky_tv/'
+    ,'/broadband/products/talktalk_tv/'
+    ,'/broadband/products/bt_vision/'
+    ,'/broadband/providers/pop_telecom/'
+    ,'/broadband/providers/post_office/'
+    ,'/broadband/providers/plusnet_business/'
+    ,'/broadband/providers/bt_business/'
+    ,'/broadband/providers/hyperoptic/'
+    ,'/broadband/providers/virgin_media_business/'
+    ,'/broadband/products/bt_phone_lines/'
+    ,'/broadband/providers/sse/'
+    ,'/broadband/products/bt_sport/'
+    ,'/broadband/providers/shell_energy_broadband/'
+    ,'/broadband/providers/john_lewis_broadband/'
+    ,'/broadband/providers/onestream/'
+    ,'/broadband/providers/xln_telecom/'
+    ,'/broadband/providers/dst/'
+    ,'/broadband/products/')
+    GROUP BY 3
+), 
+    bb_speed_test as (
+    select 'Broadband' as vertical,'Speed Test' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts ,sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page in ('/broadband/speedtest/')
+    GROUP BY 3
+), 
+bb_tv as (
+    select 'Broadband' as vertical,
+    'Broadband & TV' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week, count(distinct session_id) sessions, sum(est_commission) rev, count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts, sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.broadband.comms_broadband_master` 
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page in ('/broadband/compare/broadband_and_digital_tv/')
+    GROUP BY 3
+),
+m_comparison as (
+     select 'Mobiles' as vertical, 'Comparison Pages' as sub_vertical,
+     FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week,
+    count(distinct case when comparison_session_flag_handset is true then session_id else null end) sessions,
+    sum(case when product_type = 'handset' then est_commission else 0 end) rev, 
+    count(distinct case when product_type = 'handset' then click_ref else null end) as clickouts, 
+    sum(case when product_type = 'handset' then est_sale else 0 end) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(case when product_type = 'handset' then est_commission else 0 end),count(distinct case when comparison_session_flag_handset is true then session_id else null end)) as rev_per_session
+    from `uswitch-comms.mobiles.comms_mobiles_master`
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page   in ('/mobiles/compare/contract_phones/',
+    '/mobiles/compare/cheap_mobile_phones/')
+    group by week
+),
+m_guides as (
+      select 'Mobiles' as vertical, 'Guides' as sub_vertical,
+      FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week,
+      count(distinct session_id) sessions,
+      sum(est_commission) rev,
+      count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts,
+      sum(est_sale) / count(distinct session_id) as session_to_sale,
+      SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+      from `uswitch-comms.mobiles.comms_mobiles_master`
+      where medium = 'organic'
+      and  landing_page LIKE '/mobiles/guides/%' 
+      group by 3
+),
+m_homepage as (
+      select 'Mobiles' as vertical, 'Homepage' as sub_vertical,
+      FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week,
+      count(distinct case when comparison_session_flag_handset is true then session_id else null end) sessions,
+      sum(case when product_type in ( 'handset','simo') then est_commission else 0 end) rev, 
+      count(distinct case when product_type  in ( 'handset','simo')  then click_ref else null end) as clickouts,
+      sum(case when product_type in ( 'handset','simo') then est_sale else 0 end) / count(distinct  session_id) as session_to_sale,
+      SAFE_DIVIDE(sum(case when product_type in ( 'handset','simo') then est_commission else 0 end),count(distinct case when comparison_session_flag_handset is true then session_id else null end)) as rev_per_session
+      from `uswitch-comms.mobiles.comms_mobiles_master`
+      where medium = 'organic' --and date  BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+      and landing_page = '/mobiles/'
+      group by 3
+),
+m_iphone as (
+    select 'Mobiles',
+    'iPhone' 
+    ,FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week,
+    count(distinct case when comparison_session_flag_handset is true then session_id else null end) sessions,
+    sum(case when product_type = 'handset' then est_commission else 0 end) rev, 
+    count(distinct case when product_type = 'handset' then click_ref else null end) as clickouts, 
+    sum(case when product_type = 'handset' then est_sale else 0 end) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(case when product_type = 'handset' then est_commission else 0 end),count(distinct case when comparison_session_flag_handset is true then session_id else null end)) as rev_per_session
+    from `uswitch-comms.mobiles.comms_mobiles_master`
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and  landing_page LIKE '/mobiles/iphone%'
+    group by week
+),
+m_news as (
+    select 'Mobiles' as vertical, 
+    'News' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week,
+    count(distinct session_id) sessions,
+    sum(est_commission) rev,
+    count(distinct CASE WHEN click_ref IS NOT null THEN session_id ELSE null END) as clickouts,
+    sum(est_sale) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(est_commission),count(distinct session_id)) as rev_per_session
+    from `uswitch-comms.mobiles.comms_mobiles_master`
+    where medium = 'organic'
+    and  landing_page LIKE '/mobiles/news/%' 
+    group by 3
+), 
+m_other as (
+    select 'Mobiles' as vertical, 'Other' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week,
+    count(distinct case when comparison_session_flag_handset is true then session_id else null end) sessions,
+    sum(case when product_type = 'handset' then est_commission else 0 end) rev, 
+    count(distinct case when product_type = 'handset' then click_ref else null end) as clickouts, 
+    sum(case when product_type = 'handset' then est_sale else 0 end) / count(distinct  session_id ) as session_to_sale,
+    SAFE_DIVIDE(sum(case when product_type = 'handset' then est_commission else 0 end),count(distinct case when comparison_session_flag_handset is true then session_id else null end)) as rev_per_session
+    from `uswitch-comms.mobiles.comms_mobiles_master`
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and  landing_page in (
+    '/mobiles/oneplus-7-deals/',
+    '/mobiles/huawei-p-smart-deals/sim-free/',
+    '/mobiles/huawei-p30-deals/',
+    '/mobiles/nokia-9-pureview-deals/sim-free/',
+    '/mobiles/nokia-7-1-deals/sim-free/',
+    '/mobiles/huawei-p30-lite-deals/',
+    '/mobiles/oneplus-7-pro-5g-deals/',
+    '/mobiles/huawei_deals/',
+    '/mobiles/oneplus-7-pro-deals/',
+    '/mobiles/oppo-reno-5g-deals/',
+    '/mobiles/lg-g6-deals/sim-free/',
+    '/mobiles/google_deals/',
+    '/mobiles/sony_xperia_deals/',
+    '/mobiles/honor_deals/',
+    '/mobiles/manufacturers/',
+    '/mobiles/nokia_deals/',
+    '/mobiles/huawei-p20-pro-deals/',
+    '/mobiles/nokia-9-pureview-deals/',
+    '/mobiles/oneplus_deals/',
+    '/mobiles/sony-xperia-xz2-deals/',
+    '/mobiles/pixel-3-xl-deals/',
+    '/mobiles/sony-xperia-xa2-deals/',
+    '/mobiles/honor-10-lite-deals/',
+    '/mobiles/huawei-p20-deals/',
+    '/mobiles/sony-xperia-xa2-ultra-deals/',
+    '/mobiles/huawei-p-smart-deals/',
+    '/mobiles/honor-10-deals/',
+    '/mobiles/sony-xperia-xz3-deals/',
+    '/mobiles/nokia-7-1-deals/',
+    '/mobiles/view-20-deals/',
+    '/mobiles/nokia-5-1-plus-deals/',
+    '/mobiles/pixel-3-deals/',
+    '/mobiles/huawei-mate-20-deals/',
+    '/mobiles/lg-g6-deals/',
+    '/mobiles/xiaomi_deals/',
+    '/mobiles/huawei-p30-pro-deals/',
+    '/mobiles/htc_deals/',
+    '/mobiles/sony-xperia-xz2-compact-deals/',
+    '/mobiles/pixel-3a-deals/',
+    '/mobiles/nokia-3-1-deals/',
+    '/mobiles/huawei-mate-20-pro-deals/',
+    '/mobiles/nokia-8-sirocco-deals/',
+    '/mobiles/nokia-3-1-plus-deals/',
+    '/mobiles/nokia-7-plus-deals/',
+    '/mobiles/nokia-5-1-deals/',
+    '/mobiles/oppo_deals/',
+    '/mobiles/lg_deals/',
+    '/mobiles/nokia-8-1-deals/',
+    '/mobiles/pixel-3a-xl-deals/',
+    '/mobiles/motorola_deals/',
+    '/mobiles/sony-xperia-xz1-deals/',
+    '/mobiles/motorola-moto-c-deals/',
+    '/mobiles/motorola-moto-x-style-deals/',
+    '/mobiles/oneplus-6t-deals/',
+    '/mobiles/lg-g7-deals/')
+    group by week
+), 
+m_samsung as (
+    select 'Mobiles' as vertical, 'Samsung'as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week,
+    count(distinct case when comparison_session_flag_handset is true then session_id else null end) sessions,
+    sum(case when product_type = 'handset' then est_commission else 0 end) rev, 
+    count(distinct case when product_type = 'handset' then click_ref else null end) as clickouts, 
+    sum(case when product_type = 'handset' then est_sale else 0 end) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(case when product_type = 'handset' then est_commission else 0 end),count(distinct case when comparison_session_flag_handset is true then session_id else null end)) as rev_per_session
+    from `uswitch-comms.mobiles.comms_mobiles_master`
+    where medium = 'organic' -- and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and  landing_page LIKE '/mobiles/samsung%'
+    group by week
+), 
+m_simo as (
+    select 'Mobiles' as vertical, 'SIMO' as sub_vertical,
+    FORMAT_DATE("%Y-%m-%d",date_trunc(date, week(Monday))) as week,
+    count(distinct case when comparison_session_flag_simo is true then session_id else null end) sessions,
+    sum(case when product_type = 'simo' then est_commission else 0 end) rev, 
+    count(distinct case when product_type = 'simo' then click_ref else null end) as clickouts, 
+    sum(case when product_type = 'simo' then est_sale else 0 end) / count(distinct session_id) as session_to_sale,
+    SAFE_DIVIDE(sum(case when product_type = 'simo' then est_commission else 0 end),count(distinct case when comparison_session_flag_simo is true then session_id else null end)) as rev_per_session
+    from `uswitch-comms.mobiles.comms_mobiles_master`
+    where medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    and landing_page = '/mobiles/compare/sim_only_deals/'
+    group by week
+)
+ 
+ 
+SELECT * FROM bb_tv
+UNION ALL
+SELECT * FROM bb_comparison
+UNION ALL
+SELECT * FROM bb_fibre_optic
+UNION ALL
+SELECT * FROM bb_homepage  
+UNION ALL
+SELECT * FROM bb_homephone
+UNION ALL
+SELECT * FROM bb_packages
+UNION ALL
+SELECT * FROM bb_providers
+UNION ALL
+SELECT * FROM bb_guides
+UNION ALL
+SELECT * FROM bb_news
+UNION ALL
+SELECT * FROM bb_speed_test
+UNION ALL
+SELECT * FROM bb_postcode_checker
+UNION ALL
+SELECT * FROM m_comparison
+UNION ALL 
+SELECT * FROM m_other
+UNION ALL 
+SELECT * FROM m_samsung
+UNION ALL 
+SELECT * FROM m_simo
+UNION ALL 
+SELECT * FROM m_homepage
+UNION ALL 
+SELECT * FROM m_iphone
+UNION ALL 
+SELECT * FROM m_news
+UNION ALL 
+SELECT * FROM m_guides
