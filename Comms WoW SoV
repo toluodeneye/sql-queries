@@ -1,0 +1,110 @@
+
+-- SHARE OF VOICE - TRAFFIC CALCULATIONS (REPORTING SUBSET)
+/*
+Estimated traffic to each domain is calculated across verticals and intent.
+Calculations based only upon keyword subset
+*/
+with answer_boxes as
+( -- create a date_keyword identifier for date,keyword combinations where an answer box is present
+  select
+  concat(cast(date as string), keyword) ab_keyword_date
+ from `rvu-seo.reports.00_reports_seo__rankings_with_keywords_domains_classified`
+  where result_type = 'Answer'
+),
+data_prep as
+(
+  select
+    date,
+    keyword,
+    result_type,
+    result_type_rank,
+    vertical,
+    sub_vertical,
+    sub_sub_vertical,
+    intent,
+    google_keyword_planner_ideas_volume_12_month,
+  case
+    when keyword in (select keyword from  `rvu-seo.seo.share_of_voice_keywords_static_2020_03_02`) then 'Subset' --previously `rvu-seo.seo.share_of_voice_keywords`
+    else 'Other'
+  end subset,
+  result_url_clean,
+  case
+    when (result_url_root_domain in ('money.co.uk', 'uswitch.com', 'uswitchforbusiness.com') or ( result_url like '%bankrate.com/uk%' or result_url like '%saveonenergy.com/uk%')) then 'owned'
+    else 'non-owned'
+  end as ownership,
+  case
+    when result_url like '%bankrate.com/uk%' then 'bankrate.com/uk'
+    when result_url like '%saveonenergy.com/uk%' then 'saveonenergy.com/uk'
+    else result_url_root_domain
+  end domain,
+  site_type,
+  concat(cast(date as string), keyword) as date_keyword_ID,
+  concat(date, keyword, result_url_clean) as  date_keyword_url_ID
+ from `rvu-seo.reports.00_reports_seo__rankings_with_keywords_domains_classified`
+    where result_type in ('Organic', 'Answer')
+    and search_engine_device_type in ('d')--,'m')
+    and result_url_root_domain not in (select domain from `rvu-seo.reporting_eu.major_impassable_domains_static`)
+    and bucket_core_level_2 not in ('network','provider','competitor','supplier','speedtest' ,'brand+generic', 'brand')
+    and date >= '2019-10-01'
+  --and keyword in (select keyword from  `rvu-seo.seo.share_of_voice_keywords`)
+  --and vertical = 'Energy'
+),
+  data_transform_ab_adjust as
+(
+  select
+  date,
+  keyword,
+  result_url_clean,
+  result_type ,
+  case when (date_keyword_ID in (select ab_keyword_date from answer_boxes) and result_type = 'Organic') then result_type_rank + 1 -- +1 to each organic listing when there is an Answer Box present
+  else result_type_rank
+  end  result_type_rank,
+  vertical,
+  sub_vertical,
+  sub_sub_vertical,
+  intent,
+  google_keyword_planner_ideas_volume_12_month,
+  subset,
+  ownership,
+  domain,
+  site_type
+  from data_prep
+),
+  data_dedupe_url as
+(
+  select
+  date,
+  keyword,
+  vertical,
+  sub_vertical,
+  sub_sub_vertical,
+  intent,
+  google_keyword_planner_ideas_volume_12_month,
+  subset,
+  ownership,
+  domain,
+  site_type,
+  case when count(distinct result_url_clean) > 1 then min(result_type_rank) -- remove duplicate urls from the SERP
+  else min(result_type_rank)
+  end result_type_rank
+  from data_transform_ab_adjust
+  group by 1,2,3,4,5,6,7,8,9,10,11
+)
+select
+  DATE_TRUNC(date, week) as week,
+  domain as result_url_root_domain,
+  site_type,
+  ownership,
+  vertical,
+  sub_vertical,
+  intent,
+  subset,
+  sum(awr_ctr_data.ctr * cast(google_keyword_planner_ideas_volume_12_month as float64)) as est_traffic
+from data_dedupe_url
+  left join (select position, ctr from `rvu-seo.seo.static_awr_ctr_table`) as awr_ctr_data
+  on data_dedupe_url.result_type_rank = awr_ctr_data.position
+  where result_type_rank <= 20 -- 27/2/2020 change from <= 13
+  and vertical ='Communications'
+  and date > '2019-12-31'
+  and cast(data_dedupe_url.google_keyword_planner_ideas_volume_12_month as float64) > 0
+  group by 1,2,3,4,5,6,7,8
