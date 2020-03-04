@@ -1,0 +1,18 @@
+SELECT *, DATE_TRUNC(date,month), case when regexp_contains(keyword, r'uswitch|you switch|u switch|uswich|u swich|u swith|uswith') then 'brand' else 'non brand' end tag, CASE WHEN url LIKE '%/gas-electricity/%' or url LIKE '%/business-energy/%' or url LIKE '%/boilers/%'or url LIKE '%/insulation/%' or url LIKE '%/boiler-cover/%' or url LIKE '%/energy-saving/%' or URL LIKE '%/solar-panels/%' THEN 'energy'
+    WHEN url LIKE 'https://www.uswitch.com/' THEN 'HomePage'
+    WHEN url LIKE '%/broadband/%' OR url LIKE '%/tv/%' THEN 'broadband'
+    WHEN url LIKE '%/mobiles/%' THEN 'mobiles'
+    WHEN url LIKE '%/credit-cards/%' THEN 'credit-cards'
+    WHEN url LIKE '%/loans/%'THEN 'loans'
+    WHEN url LIKE '%/travel-insurance/%' THEN 'travel-insurance'
+    WHEN url LIKE '%/health-insurance/%' THEN 'travel-insurance'
+    WHEN url LIKE '%/mortgages/%' THEN 'mortgages'
+    WHEN url LIKE '%/current-accounts/%' OR url LIKE '%/savings-isa/%' THEN 'current-accounts'
+    WHEN url LIKE '%/credit-reports/%' THEN 'credit-reports'
+    WHEN url LIKE '%/insurance-car/%' OR url LIKE '%/car-insurance/%'  THEN 'insurance-car'
+    WHEN url LIKE '%/insurance-life/%' OR  url LIKE '%/life-insurance/%' THEN 'insurance-life'
+    WHEN url LIKE '%/insurance-other/%' OR url LIKE '%/home-insurance/%'THEN 'insurance-other'
+    WHEN url LIKE '%bankrate.com%'THEN 'mortgages'
+    END as sub_vertical FROM `rvu-seo.search_console.uswitch_page_query_country_device` 
+where country = 'gbr'
+and  regexp_contains(keyword, r'uswitch|you switch|u switch|uswich|u swich|u swith|uswith')
