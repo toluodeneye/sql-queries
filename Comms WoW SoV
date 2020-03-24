@@ -104,7 +104,7 @@ from data_dedupe_url
   left join (select position, ctr from `rvu-seo.seo.static_awr_ctr_table`) as awr_ctr_data
   on data_dedupe_url.result_type_rank = awr_ctr_data.position
   where result_type_rank <= 20 -- 27/2/2020 change from <= 13
-  and vertical ='Communications'
+  and sub_vertical ='Broadband'
   and date > '2019-12-31'
   and cast(data_dedupe_url.google_keyword_planner_ideas_volume_12_month as float64) > 0
   group by 1,2,3,4,5,6,7,8
