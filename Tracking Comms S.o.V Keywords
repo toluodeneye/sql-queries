@@ -1,6 +1,6 @@
 SELECT date, keyword, result_type, AVG(result_type_rank) as avg_rank, result_url_root_domain   FROM `rvu-seo.seo.01_gold_seo__rankings` 
 WHERE date between "2020-02-01" and '2020-04-12' 
-AND keyword in ('sim only deals' ,'mobile phone deals' ,'best sim only deals','iphone deals', 'samsung s10 deals','iphone xr deals','phone deals', 'best iphone deals', 'best mobile phone deals', 's10 deals', 'broadband deals', 'best broadband deals', 'cheap broadband' ,'broadband deals uk','compare broadband', 'internet deals', 'tv and broadband deals', 'broadband and tv deals', 'broadband comparison', 'broadband and phone deals')
+AND keyword in ('sim only deals' ,'mobile phone deals' ,'best sim only deals','iphone deals', 'samsung s20 deals','iphone xr deals','phone deals', 'best iphone deals', 'best mobile phone deals', 's20 deals', 'broadband deals', 'best broadband deals', 'cheap broadband' ,'broadband deals uk','compare broadband', 'internet deals', 'tv and broadband deals', 'broadband and tv deals', 'broadband comparison', 'broadband and phone deals')
 AnD result_url_root_domain   = 'uswitch.com'
 AND result_type in ('Organic', 'Answer')
 AND search_engine_device_type = 'd'
