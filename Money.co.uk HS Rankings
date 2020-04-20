@@ -1,0 +1,16 @@
+select
+date_trunc(date, month),
+keyword,
+vertical,
+sub_vertical,
+intent,
+is_share_of_voice_keyword ,
+google_keyword_planner_ideas_volume_12_month ,
+avg(result_type_rank )
+from `rvu-seo.reports.00_reports_seo__rankings_with_keywords_domains_classified`
+where result_url_clean like '%money.co.uk%'
+and result_type in  ('Answer', 'Organic')
+and search_engine_device_type = 'd'
+and vertical in ('Energy','Communications')
+and date between '2019-03-01' and '2020-03-31' 
+group by 1,2,3,4,5,6,7
