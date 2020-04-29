@@ -2,68 +2,56 @@ WITH
   bb_uswitch_global AS (
   SELECT
     'Broadband' AS vertical,
-    'Global Home' AS sub_vertical,
     'Global Homepage' AS performance_bucket,
-    FORMAT_DATE("%Y-%m-%d",DATE_TRUNC(date, week(Monday))) AS week,
-    COUNT(DISTINCT session_id) sessions,
+  FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, week(Monday))) AS week,
     SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
-    SUM(est_commission) rev,
-    COUNT(DISTINCT
-      CASE
-        WHEN click_ref IS NOT NULL THEN session_id
-      ELSE
-      NULL
-    END
-      ) AS clickouts,
-    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
-    SAFE_DIVIDE(SUM(est_commission),
-      COUNT(DISTINCT session_id)) AS rev_per_session
+    SUM(est_commission) revenue,
+    SUM(est_sale) AS switches    
   FROM
     `uswitch-comms.broadband.comms_broadband_master`
   WHERE
     medium = 'organic'
     AND landing_page IN ('/')
   GROUP BY
-    4 ),  
+    3 ),  
  m_uswitch_global AS (
   SELECT
     'Mobiles' AS vertical,
-    'Global Home' AS sub_vertical,
     'Global Homepage' AS performance_bucket,
     FORMAT_DATE("%Y-%m-%d",DATE_TRUNC(date, week(Monday))) AS week,
-    COUNT(DISTINCT session_id) sessions,
-    SUM (Case When comparison_session_flag_handset is True then 1 when comparison_session_flag_simo is True then 1 else 0 end) as Comparison_sessions,    
-    SUM(est_commission) AS rev,
-    COUNT(DISTINCT
-      CASE
-        WHEN click_ref IS NOT NULL THEN session_id
-      ELSE
-      NULL
-    END
-      ) AS clickouts,
-    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
-    SAFE_DIVIDE(SUM(est_commission),
-      COUNT(DISTINCT session_id)) AS rev_per_session
-  FROM
+       SUM (Case When comparison_session_flag_handset is True then 1 when comparison_session_flag_simo is True then 1 else 0 end) as Comparison_sessions,    
+    SUM(est_commission) AS revenue,
+       SUM(est_sale) AS switches
+       FROM
     `uswitch-comms.mobiles.comms_mobiles_master`
   WHERE
     medium = 'organic'
     AND (landing_page LIKE '/')
   GROUP BY
-    4 )
-, T as (    
+    3 ),
+energy_uswitch_global AS
+(select 
+'Energy' as vertical,
+'Global Homepage' AS performance_bucket,
+ FORMAT_DATE("%Y-%m-%d", DATE_TRUNC (Cast(date as date), week(Monday))) as week
+,count(distinct session_id) Comparison_sessions
+,round(sum(revenue)*1.06,2) revenue
+,round(count(distinct switch_id)*1.06) switches
 
-SELECT
-*
-FROM
- bb_uswitch_global
- UNION ALL
-SELECT
-  *
-FROM
-m_uswitch_global)
-  
-  Select vertical, T.sub_vertical,   week, sum(sessions) as sesh, sum(T.Comparison_sessions) as Comp_sesh,  sum(rev) as revenue, sum (clickouts) as clickout FROM T
-  where week > '2020-02-24'
-  Group by 1,2,3
-  Order by week desc
+from  `uswitch-energy.energy_sessions.sessions` 
+where ga_medium  = 'organic' 
+And landing_page = 'www.uswitch.com/'
+Group by 3)
+
+SELECT * From 
+bb_uswitch_global
+UNION ALL
+SELECT  * FROM
+m_uswitch_global 
+
+UNION ALL
+SELECT * FROM
+energy_uswitch_global 
+
+Where week > '2020-02-01'
+
