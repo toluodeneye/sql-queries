@@ -1,0 +1,47 @@
+WITH
+kc AS (
+  SELECT
+    distinct
+    kc.keyword,
+    kc.sub_vertical,
+    kc.vertical 
+    FROM
+    `rvu-seo.seo.01_gold_google_sheets__seo_keywords_classifier` kc),
+  sc AS (
+  SELECT
+    FORMAT_DATE("%Y-%m-%d",DATE_TRUNC(date, WEEK(Monday))) AS date_week,
+    keyword,
+    AVG(position) AS avg_pos,
+    SUM(impressions) AS impressions,
+    SUM(clicks) AS clicks,
+    url_clean,
+    
+    CASE
+    WHEN REGEXP_CONTAINS(keyword, r'uswitch|you switch|u switch|uswich|u swich|u swith|uswith|u-swi|u swi') THEN 'brand'
+  ELSE
+  'non brand'
+END
+  sub_channel
+  FROM
+    `rvu-seo.google_search_console.01_gold_google_search_console__uswitch_com`
+    Where country = 'gbr'
+    and brand = 'uswitch'
+    and url_clean like '%/broadband/providers/%'
+  GROUP BY
+    1,
+    2,
+    6)
+SELECT     
+  sc.date_week, 
+  kc.sub_vertical,
+  kc.vertical,
+  sc.sub_channel,
+  sc.keyword,
+  sc.avg_pos,
+  sc.impressions,
+  sc.clicks,
+  sc.url_clean  
+  FROM kc join sc on kc.keyword = sc.keyword
+  Where sc.date_week  between "2020-02-01" and "2020-04-30"
+  AND kc.vertical in ('Communications', 'Energy')  
+  Order by date_week desc
