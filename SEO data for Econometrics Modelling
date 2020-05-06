@@ -2,13 +2,11 @@ WITH
 kc AS (
   SELECT
     distinct
-    kc.k,
+    kc.keyword,
     kc.sub_vertical,
     kc.vertical 
-    
     FROM
-    `rvu-seo.reporting.keywords_in_classified_sheet_master` kc),
-    
+    `rvu-seo.seo.01_gold_google_sheets__seo_keywords_classifier` kc),
   sc AS (
   SELECT
     FORMAT_DATE("%Y-%m-%d",DATE_TRUNC(date, WEEK(Monday))) AS date_week,
@@ -16,9 +14,17 @@ kc AS (
     AVG(position) AS avg_pos,
     SUM(impressions) AS impressions,
     SUM(clicks) AS clicks,
-    AVG(ctr) AS ctr
+    AVG(ctr) AS ctr,
+    CASE
+    WHEN REGEXP_CONTAINS(keyword, r'uswitch|you switch|u switch|uswich|u swich|u swith|uswith|u-swi|u swi') THEN 'brand'
+  ELSE
+  'non brand'
+END
+  sub_channel
   FROM
-    `rvu-seo.search_console.search_console_dashboard_view`
+    `rvu-seo.google_search_console.01_gold_google_search_console__uswitch_com`
+    Where country = 'gbr'
+    and brand = 'uswitch'
   GROUP BY
     1,
     2)
@@ -26,15 +32,13 @@ SELECT
   sc.date_week, 
   kc.sub_vertical,
   kc.vertical,
+  sc.sub_channel,
   sc.keyword,
   sc.avg_pos,
   sc.impressions,
   sc.clicks,
   sc.ctr  
-  
-  FROM kc join sc on kc.k = sc.keyword
-  Where sc.date_week  between '2018-12-31' and '2019-11-23'
-
+  FROM kc join sc on kc.keyword = sc.keyword
+  Where sc.date_week  between '2019-07-01' and '2020-05-03'
+  AND kc.vertical in ('Communications', 'Energy')  
   Order by date_week desc
-  
-  (Two time periods 2018-01-01 to 2018-12-30) 
