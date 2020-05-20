@@ -436,7 +436,7 @@ COUNT(DISTINCT session_id) sessions,
     'Mobiles' AS vertical,
     'Homepage' AS sub_vertical,
     'Homepage' AS performance_bucket,
-    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, week(Monday))) AS week,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
     COUNT(DISTINCT session_id) sessions,
     COUNT(DISTINCT
       CASE
@@ -691,7 +691,7 @@ COUNT(DISTINCT session_id) sessions,
     'Mobiles' AS vertical,
     'SIMO' AS sub_vertical,
     'Sim' AS performance_bucket,
-    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, week(Monday))) AS week,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
     COUNT(DISTINCT session_id) as sessions, 
     COUNT(DISTINCT
       CASE
@@ -738,7 +738,7 @@ COUNT(DISTINCT session_id) sessions,
     medium = 'organic'
     AND (landing_page Like '%sim_only_deals/%'or landing_page like '/mobiles/compare/pay-as-you-go-sim-only-deals%')
   GROUP BY
-    week ),
+    4 ),
  m_uswitch_global AS (
   SELECT
     'Mobiles' AS vertical,
