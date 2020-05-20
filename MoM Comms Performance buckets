@@ -1,0 +1,877 @@
+WITH
+  bb_comparison AS (
+  SELECT
+    'Broadband'AS vertical,
+    'Comparison Pages' AS sub_vertical,
+    'Comparison' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d",DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,    
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    AND (landing_page LIKE '/broadband/compare/%'
+      OR landing_page LIKE '/broadband/mobile_broadband/'OR landing_page LIKE '/broadband/mobile-broadband/'
+      OR landing_page LIKE '/broadband/4g_mobile_broadband/'OR landing_page LIKE '/broadband/student-broadband'OR landing_page LIKE '/broadband/cheap-broadband/'OR landing_page LIKE '/broadband/broadband-only/'
+      OR landing_page LIKE '/broadband/broadband-and-free-line-rental/'
+      OR landing_page LIKE '/broadband/wireless-broadband/'
+      OR landing_page LIKE '/broadband/broadband-and-home-phone/'
+      OR landing_page LIKE '/broadband/mobile-broadband/'
+      OR landing_page LIKE '/broadband/student-broadband/'
+      OR landing_page LIKE '/broadband/business-broadband/'
+      OR landing_page LIKE '/broadband/unlimited-broadband/'
+      OR landing_page LIKE '/broadband/no-upfront-cost-broadband/'
+      OR landing_page LIKE '/broadband/4g-mobile-broadband/' )
+  GROUP BY
+    4 ),
+  bb_fibre_optic AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Fibre Optic' AS sub_vertical,
+    'Comparison' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic' -- and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    AND landing_page IN ('/broadband/compare/fibre_optic/',
+      '/broadband/compare/fibre-optic/')
+  GROUP BY
+    4 ),
+  bb_guides AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Guides' AS sub_vertical,
+    'Other' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    AND (landing_page LIKE '/broadband/guides/%' or landing_page like '/tv/guides%')
+  GROUP BY
+    4 ),
+  bb_homepage AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Homepage' AS sub_vertical,
+    'Homepage' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    AND landing_page IN ('/broadband/')
+  GROUP BY
+    4 ),
+  bb_homephone AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Broadband & Home Phone' AS sub_vertical,
+    'Comparison' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    AND landing_page IN ('/broadband/compare/broadband_and_home_phone/',
+      '/broadband/compare/broadband-and-home-phone/')
+  GROUP BY
+    4 ),
+  bb_local AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Local' AS sub_vertical,
+    'Other' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    AND landing_page LIKE ('/broadband/local/%')
+  GROUP BY
+    4 ),
+  bb_news AS (
+  SELECT
+    'Broadband' AS vertical,
+    'News' AS sub_vertical,
+    'Other' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    AND landing_page LIKE '/broadband/news/%' or landing_page like '/tv/news%%'
+  GROUP BY
+    4 ),
+  bb_packages AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Packages' AS sub_vertical,
+    'Comparison' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    AND landing_page IN ('/broadband/packages/')
+  GROUP BY
+    4 ),
+  bb_postcode_checker AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Postcode checker' AS sub_vertical,
+    'Other' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic'
+    AND landing_page IN ('/broadband/postcode_checker/',
+      '/broadband/postcode-checker/')
+  GROUP BY
+    4 ),
+  bb_providers AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Providers' AS sub_vertical,
+    'Provider_Pages'AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic'
+    AND (landing_page LIKE '/broadband/providers/%'
+      OR landing_page LIKE '/broadband/products/%'
+      OR landing_page Like '/tv/providers%')
+  GROUP BY
+    4 ),
+  bb_speed_test AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Speed Test' AS sub_vertical,
+    'Other' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    AND landing_page IN ('/broadband/speedtest/')
+  GROUP BY
+    4 ),
+  bb_tv AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Broadband & TV' AS sub_vertical,
+    'Comparison' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic' --and date BETWEEN date_trunc(date_sub(current_date(),interval 28 day), week(monday)) and date_trunc(current_date(), week(monday))
+    AND landing_page IN ('/broadband/compare/broadband_and_digital_tv/',
+      '/broadband/compare/broadband-and-digital-tv/', '/tv/','/tv/compare%')
+  GROUP BY
+    4 ),
+  bb_uswitch_global AS (
+  SELECT
+    'Broadband' AS vertical,
+    'Global Home' AS sub_vertical,
+    'Global Homepage' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag as INT64)) as Comparison_sessions,
+    SUM(est_commission) rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.broadband.comms_broadband_master`
+  WHERE
+    medium = 'organic'
+    AND landing_page IN ('/')
+  GROUP BY
+    4 ),  
+  m_comparison AS (
+  SELECT
+    'Mobiles' AS vertical,
+    'Comparison Pages' AS sub_vertical,
+    'Comparison' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+COUNT(DISTINCT session_id) sessions,
+    SUM(Cast(comparison_session_flag_handset as INT64)) as Comparison_sessions,
+    SUM(CASE
+        WHEN product_type = 'handset' THEN est_commission
+      ELSE
+      0
+    END
+      ) AS rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN product_type = 'handset' THEN click_ref
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(CASE
+        WHEN product_type = 'handset' THEN est_sale
+      ELSE
+      0
+    END
+      ) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(CASE
+          WHEN product_type = 'handset' THEN est_commission
+        ELSE
+        0
+      END
+        ),
+      COUNT(DISTINCT
+        CASE
+          WHEN comparison_session_flag_handset IS TRUE THEN session_id
+        ELSE
+        NULL
+      END
+        )) AS rev_per_session
+  FROM
+    `uswitch-comms.mobiles.comms_mobiles_master`
+  WHERE
+    medium = 'organic'
+    AND landing_page IN ('/mobiles/compare/contract_phones/',
+      '/mobiles/compare/cheap_mobile_phones/', '/mobiles/deal%', 'mobiles/compare/android-phones%','/mobiles/contract_deal%','/mobiles/compare/android-phones%','/mobiles/compare/black-friday-deals%','/mobiles/compare/free_mobile_phones%', '/mobiles/compare/refurbished_mobile_phone_deals%' )
+  GROUP BY
+    4 ),
+  m_guides AS (
+  SELECT
+    'Mobiles' AS vertical,
+    'Guides' AS sub_vertical,
+    'Other' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM (Case When comparison_session_flag_handset is True then 1 when comparison_session_flag_simo is True then 1 else 0 end) as Comparison_sessions,    
+    SUM(est_commission) AS rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.mobiles.comms_mobiles_master`
+  WHERE
+    medium = 'organic'
+    AND (landing_page LIKE '/mobiles/guides/%'
+      OR landing_page LIKE '/mobiles/articles/%'
+      OR landing_page LIKE '/mobiles/reviews/%'
+      OR landing_page LIKE '/mobiles/features/%')
+  GROUP BY
+    4 ),
+  m_homepage AS (
+  SELECT
+    'Mobiles' AS vertical,
+    'Homepage' AS sub_vertical,
+    'Homepage' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, week(Monday))) AS week,
+    COUNT(DISTINCT session_id) sessions,
+    COUNT(DISTINCT
+      CASE
+        WHEN comparison_session_flag_handset IS TRUE THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS Comparison_sessions,
+    SUM(CASE
+        WHEN product_type IN ( 'handset', 'simo') THEN est_commission
+      ELSE
+      0
+    END
+      ) AS rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN product_type IN ( 'handset', 'simo') THEN click_ref
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(CASE
+        WHEN product_type IN ( 'handset', 'simo') THEN est_sale
+      ELSE
+      0
+    END
+      ) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(CASE
+          WHEN product_type IN ( 'handset', 'simo') THEN est_commission
+        ELSE
+        0
+      END
+        ),
+      COUNT(DISTINCT
+        CASE
+          WHEN comparison_session_flag_handset IS TRUE THEN session_id
+        ELSE
+        NULL
+      END
+        )) AS rev_per_session
+  FROM
+    `uswitch-comms.mobiles.comms_mobiles_master`
+  WHERE
+    medium = 'organic'
+    AND landing_page = '/mobiles/'
+  GROUP BY
+    4 ),
+  m_iphone AS (
+  SELECT
+    'Mobiles',
+    'iPhone',
+    'iPhone' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT (Distinct session_id ) as Sessions,
+    COUNT(DISTINCT
+      CASE
+        WHEN comparison_session_flag_handset IS TRUE THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS Comparison_sessions,
+    SUM(CASE
+        WHEN product_type = 'handset' THEN est_commission
+      ELSE
+      0
+    END
+      ) AS rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN product_type = 'handset' THEN click_ref
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(CASE
+        WHEN product_type = 'handset' THEN est_sale
+      ELSE
+      0
+    END
+      ) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(CASE
+          WHEN product_type = 'handset' THEN est_commission
+        ELSE
+        0
+      END
+        ),
+      COUNT(DISTINCT
+        CASE
+          WHEN comparison_session_flag_handset IS TRUE THEN session_id
+        ELSE
+        NULL
+      END
+        )) AS rev_per_session
+  FROM
+    `uswitch-comms.mobiles.comms_mobiles_master`
+  WHERE
+    medium = 'organic'
+    AND landing_page LIKE '/mobiles/iphone%'
+  GROUP BY
+    4 ),
+  m_news AS (
+  SELECT
+    'Mobiles' AS vertical,
+    'News' AS sub_vertical,
+    'Other' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) AS sessions,
+     SUM (Case When comparison_session_flag_handset is True then 1 when comparison_session_flag_simo is True then 1 else 0 end) as Comparison_sessions, 
+    SUM(est_commission) AS rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.mobiles.comms_mobiles_master`
+  WHERE
+    medium = 'organic'
+    AND (landing_page LIKE '/mobiles/news/%'
+      OR landing_page LIKE '/mobiles/rumours/%')
+  GROUP BY
+    4 ),
+  m_other AS (
+  SELECT
+    'Mobiles' AS vertical,
+    'Other' AS sub_vertical,
+    'Handsets' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT (Distinct session_id ) as sessions,
+    COUNT(DISTINCT
+      CASE
+        WHEN comparison_session_flag_handset IS TRUE THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS Comparison_sessions,
+    SUM(CASE
+        WHEN product_type = 'handset' THEN est_commission
+      ELSE
+      0
+    END
+      ) AS rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN product_type = 'handset' THEN click_ref
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(CASE
+        WHEN product_type = 'handset' THEN est_sale
+      ELSE
+      0
+    END
+      ) / COUNT(DISTINCT session_id ) AS session_to_sale,
+    SAFE_DIVIDE(SUM(CASE
+          WHEN product_type = 'handset' THEN est_commission
+        ELSE
+        0
+      END
+        ),
+      COUNT(DISTINCT
+        CASE
+          WHEN comparison_session_flag_handset IS TRUE THEN session_id
+        ELSE
+        NULL
+      END
+        )) AS rev_per_session
+  FROM
+    `uswitch-comms.mobiles.comms_mobiles_master`
+  WHERE
+    medium = 'organic'
+    AND (landing_page LIKE '/mobiles/oneplus%'
+      OR landing_page LIKE '/mobiles/huawei%'
+      OR landing_page LIKE '/mobiles/nokia%'
+      OR landing_page LIKE '/mobiles/oppo%'
+      OR landing_page LIKE '/mobiles/lg%'
+      OR landing_page LIKE '/mobiles/google%'
+      OR landing_page LIKE '/mobiles/sony%'
+      OR landing_page LIKE '/mobiles/honor%'
+      OR landing_page LIKE '/mobiles/manufacturers/'
+      OR landing_page LIKE '/mobiles/pixel%'
+      OR landing_page LIKE '/mobiles/view-20-deals/'
+      OR landing_page LIKE '/mobiles/xiaomi%'
+      OR landing_page LIKE '/mobiles/htc%'
+      OR landing_page LIKE '/mobiles/motorola%'
+      OR landing_page LIKE '/mobiles/networks/' 
+      OR landing_page like '/mobiles/networks/%'
+      OR landing_page like  '/mobiles/manufacturers/')
+  GROUP BY
+    4 ),
+  m_samsung AS (
+  SELECT
+    'Mobiles' AS vertical,
+    'Samsung'AS sub_vertical,
+    'Samsung' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id ) as sessions,
+    COUNT(DISTINCT
+      CASE
+        WHEN comparison_session_flag_handset IS TRUE THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS Comparison_sessions,
+    SUM(CASE
+        WHEN product_type = 'handset' THEN est_commission
+      ELSE
+      0
+    END
+      ) AS rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN product_type = 'handset' THEN click_ref
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(CASE
+        WHEN product_type = 'handset' THEN est_sale
+      ELSE
+      0
+    END
+      ) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(CASE
+          WHEN product_type = 'handset' THEN est_commission
+        ELSE
+        0
+      END
+        ),
+      COUNT(DISTINCT
+        CASE
+          WHEN comparison_session_flag_handset IS TRUE THEN session_id
+        ELSE
+        NULL
+      END
+        )) AS rev_per_session
+  FROM
+    `uswitch-comms.mobiles.comms_mobiles_master`
+  WHERE
+    medium = 'organic'
+    AND landing_page LIKE '/mobiles/samsung%'
+  GROUP BY
+    4 ),
+  m_simo AS (
+  SELECT
+    'Mobiles' AS vertical,
+    'SIMO' AS sub_vertical,
+    'Sim' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, week(Monday))) AS week,
+    COUNT(DISTINCT session_id) as sessions, 
+    COUNT(DISTINCT
+      CASE
+        WHEN comparison_session_flag_simo IS TRUE THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS Comparison_sessions,
+    SUM(CASE
+        WHEN product_type = 'simo' THEN est_commission
+      ELSE
+      0
+    END
+      ) AS rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN product_type = 'simo' THEN click_ref
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(CASE
+        WHEN product_type = 'simo' THEN est_sale
+      ELSE
+      0
+    END
+      ) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(CASE
+          WHEN product_type = 'simo' THEN est_commission
+        ELSE
+        0
+      END
+        ),
+      COUNT(DISTINCT
+        CASE
+          WHEN comparison_session_flag_simo IS TRUE THEN session_id
+        ELSE
+        NULL
+      END
+        )) AS rev_per_session
+  FROM
+    `uswitch-comms.mobiles.comms_mobiles_master`
+  WHERE
+    medium = 'organic'
+    AND (landing_page Like '%sim_only_deals/%'or landing_page like '/mobiles/compare/pay-as-you-go-sim-only-deals%')
+  GROUP BY
+    week ),
+ m_uswitch_global AS (
+  SELECT
+    'Mobiles' AS vertical,
+    'Global Home' AS sub_vertical,
+    'Global Homepage' AS performance_bucket,
+    FORMAT_DATE("%Y-%m-%d", DATE_TRUNC(date, month)) as month,
+    COUNT(DISTINCT session_id) sessions,
+    SUM (Case When comparison_session_flag_handset is True then 1 when comparison_session_flag_simo is True then 1 else 0 end) as Comparison_sessions,    
+    SUM(est_commission) AS rev,
+    COUNT(DISTINCT
+      CASE
+        WHEN click_ref IS NOT NULL THEN session_id
+      ELSE
+      NULL
+    END
+      ) AS clickouts,
+    SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+    SAFE_DIVIDE(SUM(est_commission),
+      COUNT(DISTINCT session_id)) AS rev_per_session
+  FROM
+    `uswitch-comms.mobiles.comms_mobiles_master`
+  WHERE
+    medium = 'organic'
+    AND (landing_page LIKE '/')
+  GROUP BY
+    4 )
+, T as (    
+SELECT
+  *
+FROM
+  bb_tv
+UNION ALL
+SELECT
+  *
+FROM
+  bb_comparison
+UNION ALL
+SELECT
+  *
+FROM
+  bb_fibre_optic
+UNION ALL
+SELECT
+  *
+FROM
+  bb_homepage
+UNION ALL
+SELECT
+  *
+FROM
+  bb_homephone
+UNION ALL
+SELECT
+  *
+FROM
+  bb_packages
+UNION ALL
+SELECT
+  *
+FROM
+  bb_providers
+UNION ALL
+SELECT
+  *
+FROM
+  bb_guides
+UNION ALL
+SELECT
+  *
+FROM
+  bb_news
+UNION ALL
+SELECT
+  *
+FROM
+  bb_speed_test
+UNION ALL
+SELECT
+  *
+FROM
+  bb_postcode_checker
+UNION ALL
+SELECT
+*
+FROM
+ bb_uswitch_global
+ UNION ALL
+SELECT
+  *
+FROM
+  m_comparison
+UNION ALL
+SELECT
+  *
+FROM
+  m_other
+UNION ALL
+SELECT
+  *
+FROM
+  m_samsung
+UNION ALL
+SELECT
+  *
+FROM
+  m_simo
+UNION ALL
+SELECT
+  *
+FROM
+  m_homepage
+UNION ALL
+SELECT
+  *
+FROM
+  m_iphone
+UNION ALL
+SELECT
+  *
+FROM
+  m_news
+UNION ALL
+SELECT
+  *
+FROM
+  m_guides
+  UNION ALL
+SELECT
+  *
+FROM
+m_uswitch_global)
+  
+  Select vertical, sub_vertical , month, sum(sessions) as sessions, sum(T.Comparison_sessions) as Comparison_sesh,  sum(rev) as revenue, sum(clickouts) as clickouts,  AVG(session_to_sale) as cvr, AVG (rev_per_session) as rev_per_session FROM T
+  where month between '2019-04-01' and '2020-05-01'
+  Group by 1,2,3
+  Order by month desc
