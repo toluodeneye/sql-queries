@@ -1,0 +1,189 @@
+with 
+handsets_online_sales AS(
+SELECT
+CASE WHEN STRPOS(landing_page, "?") > 0 THEN SUBSTR(landing_page, 0, STRPOS(landing_page, "?") - 1)
+     WHEN STRPOS(landing_page, "#") > 0 THEN SUBSTR(landing_page, 0, STRPOS(landing_page, "#") - 1)
+     WHEN STRPOS(landing_page, "[") > 0 THEN SUBSTR(landing_page, 0, STRPOS(landing_page, "[") - 1)
+     ELSE landing_page END AS page,
+'mobiles' AS vertical,
+'handsets' AS subvertical,
+CASE WHEN medium IN ('cpc') THEN 'ppc'
+     WHEN medium IN ('organic','(none)','referral','email') THEN medium
+     WHEN medium IS NULL THEN 'no_ga'
+     ELSE 'other' END AS medium,
+CASE WHEN medium IN ('cpc') THEN 'paid search'
+     WHEN medium IN ('organic') THEN 'seo'
+     WHEN medium IN ('(none)') THEN 'direct traffic'
+     WHEN medium IN ('referral') THEN 'partnerships & other'
+     WHEN medium IN ('email') THEN medium
+     WHEN medium IS NULL THEN 'partnerships & other'
+     ELSE 'partnerships & other' END AS marketing_channel,
+'online sales' AS transaction_type,
+CASE WHEN medium IN ('cpc') THEN 'ppc'
+     ELSE NULL END AS marketing_cost_type,
+IFNULL(COUNT(DISTINCT session_id),0) AS sessions,
+IFNULL(COUNT(DISTINCT (CASE WHEN comparison_session_flag_handset IS TRUE THEN session_id ELSE NULL END)),0) AS comparison_sessions,
+IFNULL(COUNT(DISTINCT (CASE WHEN click_ref IS NOT NULL AND product_type <> 'simo' THEN session_id ELSE NULL END)),0) AS clickout_sessions,
+IFNULL(COUNT(DISTINCT (CASE WHEN product_type <> 'simo' THEN click_ref ELSE NULL END)),0) as clickouts,
+IFNULL(SUM(CASE WHEN product_type <> 'simo' THEN est_sale ELSE 0 END),0) AS sales,
+IFNULL(SUM(CASE WHEN product_type <> 'simo' THEN est_commission ELSE 0 END),0) AS revenue
+FROM `uswitch-comms.mobiles.comms_mobiles_master`
+where date(_partitiontime) between "2020-02-01" and "2020-02-29"
+and medium IN ('organic')
+GROUP BY 1,2,3,4,5,6,7
+),
+-- SECTION 1B: SIMO ONLINE SALES PERFORMANCE
+simo_online_sales AS(
+SELECT
+CASE WHEN STRPOS(landing_page, "?") > 0 THEN SUBSTR(landing_page, 0, STRPOS(landing_page, "?") - 1)
+     WHEN STRPOS(landing_page, "#") > 0 THEN SUBSTR(landing_page, 0, STRPOS(landing_page, "#") - 1)
+     WHEN STRPOS(landing_page, "[") > 0 THEN SUBSTR(landing_page, 0, STRPOS(landing_page, "[") - 1)
+     ELSE landing_page END AS page,
+'mobiles' AS vertical,
+'simo' AS subvertical,
+CASE WHEN medium IN ('cpc') THEN 'ppc'
+     WHEN medium IN ('organic','(none)','referral','email','tv') THEN medium
+     WHEN medium IS NULL THEN 'no_ga'
+     ELSE 'other' END AS medium,
+CASE WHEN medium IN ('cpc') THEN 'paid search'
+     WHEN medium IN ('organic') THEN 'seo'
+     WHEN medium IN ('(none)') THEN 'direct traffic'
+     WHEN medium IN ('referral') THEN 'partnerships & other'
+     WHEN medium IN ('email') THEN medium
+     WHEN medium IS NULL THEN 'partnerships & other'
+     ELSE 'partnerships & other' END AS marketing_channel,
+'online sales' AS transaction_type,
+CASE WHEN medium IN ('cpc') THEN 'ppc'
+     ELSE NULL END AS marketing_cost_type,
+IFNULL(COUNT(DISTINCT session_id),0) AS sessions,
+IFNULL(COUNT(DISTINCT (CASE WHEN comparison_session_flag_simo IS TRUE THEN session_id ELSE NULL END)),0) AS comparison_sessions,
+IFNULL(COUNT(DISTINCT (CASE WHEN click_ref IS NOT NULL AND product_type = 'simo' THEN session_id ELSE NULL END)),0) AS clickout_sessions,
+IFNULL(COUNT(DISTINCT (CASE WHEN product_type = 'simo' THEN click_ref ELSE NULL END)),0) as clickouts,
+IFNULL(SUM(CASE WHEN product_type = 'simo' THEN est_sale ELSE 0 END),0) AS sales,
+IFNULL(SUM(CASE WHEN product_type = 'simo' THEN est_commission ELSE 0 END),0) AS revenue
+FROM `uswitch-comms.mobiles.comms_mobiles_master`
+where date(_partitiontime) between "2020-02-01" and "2020-02-29"
+and medium IN ('organic')
+GROUP BY 1,2,3,4,5,6,7
+),
+-- SECTION 1C: TOTAL MOBILES ONLINE SALES PERFORMANCE
+t AS(
+SELECT *
+FROM handsets_online_sales
+UNION ALL
+SELECT *
+FROM simo_online_sales
+),
+a as (
+select
+case when page = '/' then page
+     when page = '/mobiles/' then page
+     when page like '/mobiles/articles%' then '/mobiles/articles/'
+     when page like '/mobiles/authors%' then '/mobiles/authors/'
+     when page like '/mobiles/blackberry%' then '/mobiles/blackberry/'
+     when page like '/mobiles/broadband-and-mobile-awards%' then '/mobiles/broadband-and-mobile-awards/'
+     when page like '/mobiles/compare/android-phones%' then '/mobiles/compare/android-phones/'
+     when page like '/mobiles/compare/black-friday-deals%' then '/mobiles/compare/black-friday-deals/'
+     when page like '/mobiles/compare/cheap_mobile_phones%' then '/mobiles/compare/cheap_mobile_phones/'
+     when page like '/mobiles/compare/contract_phones%' then '/mobiles/compare/contract_phones/'
+     when page like '/mobiles/compare/free_mobile_phones%' then '/mobiles/compare/free_mobile_phones/'
+     when page like '/mobiles/compare/iphone_sim_only_deals%' then '/mobiles/compare/iphone_sim_only_deals/'
+     when page like '/mobiles/compare/no_credit_check_sim_only_deals%' then '/mobiles/compare/no_credit_check_sim_only_deals/'
+     when page like '/mobiles/compare/pay-as-you-go-sim-only-deals%' then '/mobiles/compare/pay-as-you-go-sim-only-deals/'
+     when page like '/mobiles/compare/refurbished_mobile_phone_deals%' then '/mobiles/compare/refurbished_mobile_phone_deals/'
+     when page like '/mobiles/compare/sim_only_deals%' then '/mobiles/compare/sim_only_deals/'
+     when page like '/mobiles/contract_deal%' then '/mobiles/contract_deal/'
+     when page like '/mobiles/deal-o-meter%' then '/mobiles/deal-o-meter/'
+     when page like '/mobiles/deal%' then '/mobiles/deal/'
+     when page like '/mobiles/features%' then '/mobiles/features/'
+     when page like '/mobiles/google%' then '/mobiles/google'
+     when page like '/mobiles/guides%' then '/mobiles/guides/'
+     when page like '/mobiles/honor%' then '/mobiles/honor'
+     when page like '/mobiles/hp%' then '/mobiles/hp'
+     when page like '/mobiles/htc%' then '/mobiles/htc'
+     when page like '/mobiles/huawei%' then '/mobiles/huawei'
+     when page like '/mobiles/iphone%' then '/mobiles/iphone'
+     when page like '/mobiles/lg%' then '/mobiles/lg'
+     when page = '/mobiles/manufacturers/' then page
+     when page like '/mobiles/manufacturers/apple%' then '/mobiles/manufacturers/apple'
+     when page like '/mobiles/manufacturers/huawei%' then '/mobiles/manufacturers/huawei'
+     when page like '/mobiles/manufacturers/samsung%' then '/mobiles/manufacturers/samsung'
+     when page like '/mobiles/mate%' then '/mobiles/mate'
+     when page like '/mobiles/microsoft%' then '/mobiles/microsoft'
+     when page like '/mobiles/motorola%' then '/mobiles/motorola'
+     when page = '/mobiles/networks/' or page = '/mobiles/networks/%' then '/mobiles/networks/'
+     when page like '/mobiles/news%' then '/mobiles/news'
+     when page like '/mobiles/nokia%' then '/mobiles/nokia'
+     when page like '/mobiles/oneplus%' then '/mobiles/oneplus'
+     when page like '/mobiles/oppo-reno%' then '/mobiles/oppo-reno'
+     when page like '/mobiles/oppo_deals%' then '/mobiles/oppo_deals'
+     when page like '/mobiles/pixel-3%' then '/mobiles/pixel-3'
+     when page like '/mobiles/reviews%' then '/mobiles/reviews/'
+     when page like '/mobiles/rumours%' then '/mobiles/rumours/'
+     when page like '/mobiles/samsung%' then '/mobiles/samsung'
+     when page like '/mobiles/sim-only-deal%' then '/mobiles/sim-only-deal'
+     when page like '/mobiles/sony%' then '/mobiles/sony'
+     when page like '/mobiles/xiaomi%' then '/mobiles/xiaomi'
+     when page like '/about-us%' then '/about-us/'
+     when page like '/account%' then '/account/'
+     when page like '/banking%' then '/banking/'
+     when page like '/blog%' then '/blog/'
+     when page like '/boiler-cover%' then '/boiler-cover/'
+     when page like '/boilers%' then '/boilers/'
+     when page like '/broadband%' then '/broadband/'
+     when page like '/business-energy%' then '/business-energy/'
+     when page like '/car-insurance%' then '/car-insurance/'
+     when page like '/credit-cards%' then '/credit-cards/'
+     when page like '/credit-reports%' then '/credit-reports/'
+     when page like '/current-accounts%' then '/current-accounts/'
+     when page like '/debt-help%' then '/debt-help/'
+     when page like '/energy%' then '/energy/'
+     when page like '/faqs%' then '/faqs/'
+     when page like '/gas-electricity%' then '/gas-electricity/'
+     when page like '/green-deal%' then '/green-deal/'
+     when page like '/health-insurance%' then '/health-insurance/'
+     when page like '/home-insurance%' then '/home-insurance/'
+     when page like '/income-protection%' then '/income-protection/'
+     when page like '/insurance%' then '/insurance/'
+     when page like '/investments%' then '/investments/'
+     when page like '/life-insurance%' then '/life-insurance/'
+     when page like '/loans%' then '/loans/'
+     when page like '/mobile-app%' then '/mobile-app/'
+     when page like '/media-centre%' then 'media-centre/'
+     when page like '/mortgages%' then '/mortgages/'
+     when page like '/place-to-live%' then '/place-to-live/'
+     when page like '/savings%' then '/savings/'
+     when page like '/search%' then '/search/'
+     when page like '/solar-panels%' then '/solar-panels/'
+     when page like '/travel-insurance%' then '/travel-insurance/'
+     when page like '/tv/' then '/tv/'
+     when page like '/tv/compare%' then '/tv/compare/'
+     when page like '/tv/providers%' then '/tv/providers/'
+     when page like '/tv/news%' then '/tv/news/'
+     when page like '/tv/guides%' then '/tv/guides/'
+     when page like '/tv%' then page
+     when page like '/vacancies%' then '/vacancies/'
+     when page like '/water%' then '/water/'
+     when page is null then null
+     else 'other' end as landing_page,
+vertical,
+subvertical,
+medium,
+marketing_channel,
+transaction_type,
+marketing_cost_type,
+sum(sessions) as sessions,
+sum(comparison_sessions) as comparison_sessions,
+sum(clickout_sessions) as clickout_sessions,
+sum(clickouts) as clickouts,
+sum(sales) as sales,
+sum(revenue) as revenue
+from t
+group by 1,2,3,4,5,6,7
+)
+select distinct landing_page,
+sum(sessions),
+sum(revenue)
+from a
+group by 1
+order by 2 desc
