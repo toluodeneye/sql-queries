@@ -1,16 +1,13 @@
 # sql-queries
 With sv as(
-
-SELECT keyword, sub_vertical, google_keyword_planner_ideas_volume_12_month FROM `rvu-seo.seo.share_of_voice_keywords`sv),
-
-sc as(
-Select date, keyword, sum(clicks) as clicks, sum(impressions) as impressions, AVG(position) as position FROM `rvu-seo.seo.google_search_console_uswitch_com` where country = 'gbr'
-group by 1,2)
-
+SELECT keyword, sub_vertical, google_keyword_planner_ideas_volume_12_month FROM `rvu-seo.04_lookups_google_sheets.keyword_classification_master_eu` where is_share_of_voice_keyword = '1'),
+sc as(Select date, keyword, sum(clicks) as clicks, sum(impressions) as impressions, AVG(position) as position FROM rvu-seo.seo.google_search_console_uswitch_com where country = 'gbr'group by 1,2)
 Select
-
 sc.date, sv.keyword, sv.sub_vertical, sv.google_keyword_planner_ideas_volume_12_month, sc.clicks, sc.impressions, sc.position,
+from sv join sc on sv.keyword = sc.keyword
+where sc.date > '2020-02-29'
+and sv.sub_vertical in ('broadband', 'mobiles')
 
-from sv join sc on sv.keyword = sc.keyword 
+group by 1,2,3,4,5,6,7
 
-where sc.date > '2019-12-01'
+Having sc.clicks >3
