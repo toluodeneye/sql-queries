@@ -1,0 +1,49 @@
+SELECT
+  DATE_TRUNC(date,month) AS month,
+--   date,
+  url_clean,
+  keyword,
+  SUM(impressions) AS impressions,
+  SUM(clicks) AS clicks,
+  AVG(position) AS Avg_pos,
+  CASE
+    WHEN REGEXP_CONTAINS(keyword, r'uswitch|you switch|u switch|uswich|u swich|u swith|uswith|u-swi|u swi') THEN 'brand'
+  ELSE
+  'non brand'
+END
+  tag,
+  CASE
+    WHEN url_clean LIKE '%/gas-electricity/%' OR url_clean LIKE '%/business-energy/%' OR url_clean LIKE '%/boilers/%'OR url_clean LIKE '%/insulation/%' OR url_clean LIKE '%/boiler-cover/%' OR url_clean LIKE '%/energy-saving/%' OR url_clean LIKE '%/solar-panels/%' THEN 'energy'
+    WHEN url_clean LIKE 'https://www.uswitch.com/' THEN 'HomePage'
+    WHEN url_clean LIKE '%/broadband/%' OR url_clean LIKE '%/tv/%' THEN 'broadband'
+    WHEN url_clean LIKE '%/mobiles/%' THEN 'mobiles'
+    WHEN url_clean LIKE '%/credit-cards/%' THEN 'credit-cards'
+    WHEN url_clean LIKE '%/loans/%'THEN 'loans'
+    WHEN url_clean LIKE '%/travel-insurance/%' THEN 'travel-insurance'
+    WHEN url_clean LIKE '%/health-insurance/%' THEN 'Health-insurance'
+    WHEN url_clean LIKE '%/insurance/%' THEN 'insurance'
+    WHEN url_clean LIKE '%/mortgages/%' THEN 'mortgages'
+    WHEN url_clean LIKE '%/current-accounts/%' OR url_clean LIKE '%/savings-isa/%' THEN 'current-accounts'
+    WHEN url_clean LIKE '%/credit-reports/%' THEN 'credit-reports'
+    WHEN url_clean LIKE '%/insurance-car/%' OR url_clean LIKE '%/car-insurance/%' THEN 'insurance-car'
+    WHEN url_clean LIKE '%/insurance-life/%'
+  OR url_clean LIKE '%/life-insurance/%' THEN 'insurance-life'
+    WHEN url_clean LIKE '%/insurance-other/%' OR url_clean LIKE '%/home-insurance/%'THEN 'insurance-other'
+    WHEN url_clean LIKE '%bankrate.com%'THEN 'mortgages'
+END
+  AS sub_vertical
+FROM
+  `rvu-seo.seo.google_search_console_uswitch_com`
+WHERE
+  country = 'gbr'
+  and date >'2020-05-31'
+
+--   AND REGEXP_CONTAINS(keyword, r'uswitch|you switch|u switch|uswich|u swich|u swith|uswith|u-swi|u swi')
+GROUP BY
+  1,
+  2,
+  3
+HAVING
+  sub_vertical in ('broadband', 'mobiles')
+ORDER BY
+  clicks DESC
