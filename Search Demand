@@ -1,0 +1,53 @@
+-- collect keyword ranking data
+with keywords as (
+  select 
+    date,
+    keyword, 
+    position  
+  from `rvu-seo.seo.google_search_console_uswitch_com`			
+  where 1=1			
+  and country = 'gbr'
+  and keyword in (select keyword from `rvu-seo.04_lookups_google_sheets.keyword_classification_master_eu` where vertical = 'Communications' ) 
+) ,
+-- take only the top ranking Uswitch URL for each keyword 
+keywords_agg as (
+  select 
+    date, 
+    keyword, 
+    min(position) min_rank 
+  from keywords
+  group by 1,2
+) ,
+-- collect the max rank over time for each keyword
+keyword_group as (
+  select
+    keyword,
+    max(min_rank) max_rank
+  from keywords_agg 
+  group by 1
+) , 
+-- collect daily gsc data using filtered keyword list 
+daily as (
+  select			
+    date,			
+    keyword, 
+    min(position) min_rank ,
+    max(clicks) max_clks , 
+    max(impressions) max_imps
+  from `rvu-seo.seo.google_search_console_uswitch_com` gsc
+  where 1=1			
+  and country = 'gbr'			
+  and keyword in (select keyword from keyword_group where max_rank <=10) -- filter on keywords which have always ranked in SERP 1
+  and position <= 10 --test 
+  group by 1,2			
+)
+-- aggregate by month, remove keyword level 
+select 
+  date_trunc(date, month) month, 
+  count(distinct keyword) cnt_k, 
+  sum(max_imps) imps, 
+  sum(max_clks) clks,
+  avg(min_rank) avg_rank, 
+from daily 
+group by 1
+order by 1
