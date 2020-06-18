@@ -1,13 +1,53 @@
-# sql-queries
-With sv as(
-SELECT keyword, sub_vertical, google_keyword_planner_ideas_volume_12_month FROM `rvu-seo.04_lookups_google_sheets.keyword_classification_master_eu` where is_share_of_voice_keyword = '1'),
-sc as(Select date, keyword, sum(clicks) as clicks, sum(impressions) as impressions, AVG(position) as position FROM rvu-seo.seo.google_search_console_uswitch_com where country = 'gbr'group by 1,2)
-Select
-sc.date, sv.keyword, sv.sub_vertical, sv.google_keyword_planner_ideas_volume_12_month, sc.clicks, sc.impressions, sc.position,
-from sv join sc on sv.keyword = sc.keyword
-where sc.date > '2020-02-29'
-and sv.sub_vertical in ('broadband', 'mobiles')
-
-group by 1,2,3,4,5,6,7
-
-Having sc.clicks >3
+WITH
+  sv AS(
+  SELECT
+    keyword,
+    sub_vertical,
+    google_keyword_planner_ideas_volume_12_month
+  FROM
+    `rvu-seo.04_lookups_google_sheets.keyword_classification_master_eu`
+  WHERE
+    is_share_of_voice_keyword = '1'),
+  sc AS(
+  SELECT
+    date,
+    keyword,
+    SUM(clicks) AS clicks,
+    SUM(impressions) AS impressions,
+    AVG(position) AS position
+  FROM
+    rvu-seo.seo.google_search_console_uswitch_com
+  WHERE
+    country = 'gbr'
+  GROUP BY
+    1,
+    2)
+SELECT
+  sc.date,
+  sv.keyword,
+  sv.sub_vertical,
+  sv.google_keyword_planner_ideas_volume_12_month,
+  sc.clicks,
+  sc.impressions,
+  sc.position,
+FROM
+  sv
+JOIN
+  sc
+ON
+  sv.keyword = sc.keyword
+WHERE
+  sc.date > '2020-04-30'AND sv.sub_vertical IN ('broadband',
+    'mobiles','core', 'electricity-only', 'dual fuel','gas-only', 'business','household','green')
+GROUP BY
+  1,
+  2,
+  3,
+  4,
+  5,
+  6,
+  7
+HAVING
+  sc.clicks >3
+  AND
+  sc.impressions >90
