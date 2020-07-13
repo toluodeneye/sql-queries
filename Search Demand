@@ -1,3 +1,57 @@
+#### Nu search demand #####
+with full_kw_list as (
+select keyword, vertical, sub_vertical , avg(result_type_rank ) avg_rank  from `rvu-seo.reports.00_reports_seo__rankings_with_keywords_domains_classified`
+where date >= '2020-06-25'
+and result_type in ('Organic', 'Answer')
+and vertical in ('Communications','Energy')
+and result_url_root_domain  = 'uswitch.com'
+and is_share_of_voice_keyword = '1'
+and (keyword not like '%uswitch%' or keyword not like '%u switch%' or keyword not like '%you switch%')
+group by 1,2,3
+),
+narrow as (
+select
+keyword, vertical, sub_vertical,
+from  full_kw_list
+where avg_rank <= 5
+group by 1,2,3
+),
+gsc as (
+select
+date,
+n.keyword,
+n.vertical,
+n.sub_vertical,
+sc.position,
+sc.clicks,
+sc.impressions,
+from  narrow n
+left join `rvu-seo.seo.google_search_console_uswitch_com` sc on n.keyword = sc.keyword
+where date >= '2020-06-25'
+and url_clean in ('https://www.uswitch.com/broadband/',
+'https://www.uswitch.com/mobiles/',
+'https://www.uswitch.com/gas-electricity/',
+'https://www.uswitch.com/mobiles/compare/sim_only_deals/'
+)
+and country = 'gbr'
+) ,
+final as (
+select
+date,
+keyword,
+vertical,
+sub_vertical ,
+avg(position) rank,
+sum(clicks) clks,
+sum(impressions) imps
+from gsc
+
+group by 1,2,3,4
+)
+select * from final where imps > 10
+
+
+###### END #######
 -- collect keyword ranking data
 with keywords as (
   select 
