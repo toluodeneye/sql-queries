@@ -1,0 +1,6 @@
+SELECT 
+  result_url_root_domain, vertical, sub_vertical, sum(result_type_rank * Cast(google_keyword_planner_ideas_volume_12_month as INT64))/sum(Cast(google_keyword_planner_ideas_volume_12_month as INT64))
+FROM `rvu-seo.reports.00_reports_seo__rankings_with_keywords_domains_classified_rvu_and_competitor_only` 
+  WHERE date = "2020-08-14" 
+  and keyword in (select keyword from `rvu-seo.seo.top_20_share_of_voice_by_volume`) 
+group by 1,2,3
