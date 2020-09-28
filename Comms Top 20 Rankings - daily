@@ -1,0 +1,67 @@
+SELECT
+date,
+keyword,
+AVG(result_type_rank ) avg_rank,
+result_type ,
+result_url_root_domain,
+--   search_engine_device_type,
+
+FROM
+`rvu-seo.reports.00_reports_seo__rankings_with_keywords_domains_classified`
+WHERE
+
+result_url_root_domain = 'uswitch.com'
+And date > '2020-09-20'
+--   AND vertical = 'Communications'
+AND result_type IN ('Organic','Answer')
+and keyword in (
+'broadband deals',
+'best broadband deals',
+'broadband',
+'broadband checker',
+'internet deals',
+'switch broadband',
+'broadband deals uk',
+'compare broadband',
+'broadband comparison',
+'fibre broadband',
+'internet providers',
+'cheap broadband',
+'best broadband in my area',
+'broadband switch',
+'broadband and phone deals',
+'home broadband',
+'broadband providers',
+'broadband and tv deals',
+'best internet deals',
+'tv and broadband deals',
+'sim only deals',
+'mobile phone deals',
+'iphone 11 deals',
+'best sim only deals',
+'iphone 11 pro max contract',
+'samsung s10 deals',
+'best iphone 11 deals',
+'sim only contracts',
+'iphone 11 contract',
+'iphone 11 pro deals',
+'iphone deals',
+'phone contracts',
+'cheap sim only deals',
+'compare sim only deals',
+'iphone 11 pro max deals',
+'sim only',
+'phone deals',
+'iphone xr deals',
+'sim only deals uk',
+'best mobile phone deals',
+'iphone 11 contract',
+'iphone 11 pro max contract',
+'iphone 11 pro max deals'
+)
+AND search_engine_device_type = 'd'
+GROUP BY
+1,
+2,
+4,
+5
