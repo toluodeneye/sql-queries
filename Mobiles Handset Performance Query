@@ -1,0 +1,58 @@
+SELECT
+date_trunc(date, month) as month,
+landing_page ,
+COUNT (DISTINCT session_id ) AS Sessions,
+COUNT(DISTINCT
+CASE
+WHEN comparison_session_flag_handset IS TRUE THEN session_id
+ELSE
+NULL
+END
+) AS Comparison_sessions,
+COUNT(DISTINCT
+CASE
+WHEN product_type = 'handset' THEN click_ref
+ELSE
+NULL
+END
+) AS clickouts,
+SUM(CASE
+WHEN product_type = 'handset' THEN est_sale
+ELSE
+0
+END) as sales,
+SUM(CASE
+WHEN product_type = 'handset' THEN est_commission
+ELSE
+0
+END
+) AS revenue,
+SUM(CASE
+WHEN product_type = 'handset' THEN est_sale
+ELSE
+0
+END
+) / COUNT(DISTINCT session_id) AS session_to_sale,
+SAFE_DIVIDE(SUM(CASE
+WHEN product_type = 'handset' THEN est_commission
+ELSE
+0
+END
+),
+COUNT(DISTINCT
+CASE
+WHEN comparison_session_flag_handset IS TRUE THEN session_id
+ELSE
+NULL
+END
+)) AS rev_per_session
+FROM
+`uswitch-comms.mobiles.comms_mobiles_master`
+WHERE
+comparison_session_flag_handset IS TRUE
+AND product_type = 'handset'
+AND medium = 'organic'
+AND country = 'United Kingdom'
+AND date > '2020-06-01'
+Group by 1,2
+Having sessions > 20
