@@ -6,28 +6,40 @@ kc AS (
     kc.sub_vertical,
     kc.vertical 
     FROM
-    `rvu-seo.seo.01_gold_google_sheets__seo_keywords_classifier` kc),
+    `rvu-seo.seo.01_gold_google_sheets__seo_keywords_classifier` kc
+    where 1=1
+    AND vertical in ('Communications', 'Energy')  
+  ),
+  sc_daily as (
+  SELECT
+    date,
+    keyword, 
+    device,
+    MIN(position) AS min_pos,
+    MAX(impressions) AS impressions,
+    SUM(clicks) AS clicks,
+  FROM `rvu-seo.google_search_console.01_gold_google_search_console__uswitch_com`
+  Where 1=1
+  and keyword in (select keyword from kc) 
+  and date between '2020-03-23' and '2020-11-15'
+  and country = 'gbr'
+  and brand = 'uswitch' 
+  GROUP BY 1,2,3
+  ), 
   sc AS (
   SELECT
     FORMAT_DATE("%Y-%m-%d",DATE_TRUNC(date, WEEK(Monday))) AS date_week,
     keyword,
-    AVG(position) AS avg_pos,
+    AVG(min_pos) AS avg_pos,
     SUM(impressions) AS impressions,
     SUM(clicks) AS clicks,
-    AVG(ctr) AS ctr,
     CASE
     WHEN REGEXP_CONTAINS(keyword, r'uswitch|you switch|u switch|uswich|u swich|u swith|uswith|u-swi|u swi') THEN 'brand'
-  ELSE
-  'non brand'
-END
-  sub_channel
-  FROM
-    `rvu-seo.google_search_console.01_gold_google_search_console__uswitch_com`
-    Where country = 'gbr'
-    and brand = 'uswitch'
-  GROUP BY
-    1,
-    2)
+    ELSE 'non brand'
+    END sub_channel
+  FROM sc_daily
+  GROUP BY 1,2
+  )
 SELECT     
   sc.date_week, 
   kc.sub_vertical,
@@ -37,8 +49,5 @@ SELECT
   sc.avg_pos,
   sc.impressions,
   sc.clicks,
-  sc.ctr  
   FROM kc join sc on kc.keyword = sc.keyword
-  Where sc.date_week  between '2019-07-01' and '2020-05-03'
-  AND kc.vertical in ('Communications', 'Energy')  
   Order by date_week desc
