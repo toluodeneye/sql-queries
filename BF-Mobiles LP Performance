@@ -1,0 +1,41 @@
+SELECT
+date,
+landing_page,
+COUNT(DISTINCT session_id) sessions,
+SUM(Cast(comparison_session_flag_handset as INT64)) as Comparison_sessions_handset,
+SUM(Cast(comparison_session_flag_simo as INT64)) as Comparison_sessions_simo,
+SUM(est_commission) AS est_rev,
+COUNT(DISTINCT
+CASE
+WHEN click_ref IS NOT NULL THEN session_id
+ELSE
+NULL
+END
+) AS clickouts,
+SUM(est_sale) / COUNT(DISTINCT session_id) AS session_to_sale,
+SAFE_DIVIDE(SUM(est_commission
+),
+COUNT(DISTINCT session_id)) AS rev_per_session,
+sum(actual_commission) as actual_rev,
+
+-- provider,
+-- product_description,
+CASE
+WHEN landing_page LIKE '%black-friday%' THEN 'black friday'
+END AS black_friday_flag,
+CASE
+WHEN date <= "2020-11-16" THEN 'week before'
+ELSE 'bf week'
+END AS
+week_tag
+FROM
+`uswitch-comms.mobiles.comms_mobiles_master`
+WHERE
+medium = 'organic'
+And date >= '2020-11-02'
+and country ='United Kingdom'
+GROUP BY
+1,2
+Having est_rev > 0
+ORDER BY
+sessions DESC
