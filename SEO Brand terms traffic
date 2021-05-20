@@ -1,0 +1,17 @@
+with gsc as (
+select
+date ,
+url_clean,
+sum(clicks) clks,
+sum(impressions) imps
+from `rvu-seo.google_search_console.01_gold_google_search_console__uswitch_com`
+where 1=1
+and date >= '2021-05-01'
+and country = 'gbr'
+and regexp_contains(keyword, r'iswtch bro|uswitch broadband|you switch broadband|u switch broadband|uswich broadband|u swich broadband|u swith broadband|uswith broadband|uswitch broadband|u switch broadband|uswitch internet|u switch internet|you switch internet|iswitch internet')
+group by 1,2
+)
+select * from gsc
+where 1=1
+and clks >0
+order by 1 asc
