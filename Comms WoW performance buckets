@@ -872,6 +872,6 @@ FROM
 m_uswitch_global)
   
   Select vertical, sub_vertical , week, sum(sessions) as sessions, sum(T.Comparison_sessions) as Comparison_sesh,  sum(rev) as revenue, sum(clickouts) as clickouts,  AVG(session_to_sale) as cvr, AVG (rev_per_session) as rev_per_session FROM T
-  where week > '2020-04-20'
+  where week > '2021-06-28'
   Group by 1,2,3
   Order by week desc
